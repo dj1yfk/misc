@@ -22,7 +22,7 @@ print "Converted from $ARGV\n<eoh>\n";
 
 # 9306271135DL/ON4WW/M  539559 14 MHzCW  Mark/100 km/h                         3
 # 0     6   10          22 25 28     35  39
-while (length($line) >= 79) {
+while (length($line) >= 78) {
     my $qso = substr($line, 0, 78);
     $line = substr($line, 78,);
     print STDERR "$qso\n";
