@@ -36,13 +36,22 @@ while (length($line) >= 78) {
     $rstr =~ s/\s+$//g;
 	my $freq  = substr($qso, 28, 3);
     $freq =~ s/\s+//g;
+    if ($freq eq "10") {
+        $freq = 10.1;
+    }
+    elsif ($freq eq "18") {
+        $freq = 18.1;
+    }
+    elsif ($freq eq "24") {
+        $freq = 24.9;
+    }
 	my $mode  = substr($qso, 35, 4);
     $mode =~ s/\s+//g;
 	my $rem   = substr($qso, 39, 38);
     $rem =~ s/\s+$//g;
     $rem = $converter->convert($rem);
 
-    if ($call) {
+    if ($call ne "") {
         print a("qso_date", $date);
         print a("time_on", $utc);
         print a("call", $call);
