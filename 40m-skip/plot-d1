@@ -1,0 +1,14 @@
+set title "DL2JA <-> DL0PF SNR over time"
+set xdata time
+set style data line
+#set term png
+set terminal pngcairo size 1200,400 enhanced font 'Verdana,10'
+set timefmt '"%Y-%m-%d %H:%M"'
+set format x "%d.%m.\n%H:%M"
+set xlabel "Time"
+set xrange ["2024-05-01 00:00":"2024-05-01 23:59"]
+set ylabel "SNR" 
+set autoscale y
+set output "dl2ja.png"
+plot "data.txt" using 1:2  w lines
+

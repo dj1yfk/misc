@@ -1,0 +1,13 @@
+set title "JN58vk <-> JN68rn 40m WSPR SNR over time"
+set xdata time
+set style data line
+#set term png
+set terminal pngcairo size 1600,400 enhanced font 'Verdana,10'
+set timefmt '"%Y-%m-%d %H:%M"'
+set format x "%d.%m.\n%H:%M"
+set xlabel "Time"
+set ylabel "SNR" 
+set autoscale y
+set output "dl2ja.png"
+plot "data.txt" using 1:2  w lines
+
