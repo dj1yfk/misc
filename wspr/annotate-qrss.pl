@@ -1,10 +1,11 @@
 #!/usr/bin/perl -w
 
-# annotates a QrssPiG output picture with received WSPR signals from k9an-wsprd
-# see: https://fkurz.net/ham/qrss/qrss-wsprd-setup.html
+system("sleep 10");
 
 use strict;
 use warnings;
+
+#convert 30m.png  -pointsize 12 -fill white -annotate +130+100 'SO5CW' 30m-a.png
 
 # offsets start in the top left corner of the image
 
@@ -19,15 +20,13 @@ my $y0 = 215;
 my $ys = 1.4;
 
 chdir("/home/fabian/grabs");
+`rm -f 30m-*.png`;
 
 my $filename = "30m.png";
 $filename =~ /(.*).png$/;
 my $basename = $1;
 
-# Fetch latest spots...
-#my $data = `curl "https://db1.wspr.live/?query=SELECT%20time,%20frequency,%20tx_sign,%20tx_loc,%20distance,%20power,%20snr%20FROM%20wspr.rx%20where%20match(rx_sign,%27^SO5CW%27)%20and%20time%20%3E%20subtractMinutes(now(),%2013)%20order%20by%20time%20desc%20limit%2010%20FORMAT%20CSV"`;
-
-my $data = `tail -n50 ~/wsprcan/ALL_WSPR.TXT`;
+my $data = `tail -n150 ~/wsprcan/ALL_WSPR.TXT`;
 my @d = split(/\n/, $data);
 @d = reverse(@d);
 
@@ -36,6 +35,10 @@ my $cnt = 0;
 `cp $filename $basename-0.png`;
 
 my $min10_start = -1;
+
+my $annotations = "";
+
+# assemble string with annotations 
 
 foreach my $line (@d) {
     # 240810 1502   4 -23 -2.2 10.1401428  DJ2TS JO40 30           0     1    0
@@ -58,13 +61,17 @@ foreach my $line (@d) {
 
     my $xpos = 4 + $x0 + $wx * $slot;
     my $ypos = $y0 - $ys * ($freq - 10140200) - 5;
-    #    print $line."\n";
-
-    `convert $basename-$oc.png -pointsize 12 -fill white -annotate +$xpos+$ypos '$call' $basename-$cnt.png`;
-    `rm -f $basename-$oc.png`;
+    $annotations .= " -annotate +$xpos+$ypos '$call'  ";
 
 }
-`cp $basename-$cnt.png $filename`;
+
+
+my $cmd = "convert $basename-0.png -pointsize 12 -fill white $annotations $filename";
+
+#print " cmd line: $cmd ";
+
+`$cmd`;
+
 `scp $filename fabian\@d.fkurz.net:/home/fabian/sites/fkurz.net/ham/qrss`
 
 
