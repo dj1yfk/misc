@@ -25,6 +25,25 @@ my $filename = "30m.png";
 $filename =~ /(.*).png$/;
 my $basename = $1;
 
+
+# add this 10 minute slice to the 24h display *before* we add the WSPR overlay
+# the 24h display is 1440 pixels wide (10 per 10 min slice) and 680px high
+# we move everything 10 pixels to the left and add the latest slice at the end
+
+system("convert -crop 875x680+93+106 $filename cropped.png");   # cut out area of interest
+system("mogrify -resize 10x680\! cropped.png");                 # smash to 10px width
+
+# remove oldest 10 minutes from 24h pic
+system("convert -gravity West -chop 10x0 24h.png 24hcrop.png");
+
+# append slice
+system("convert 24hcrop.png cropped.png +append 24h.png");
+
+# embed in template 
+system("convert ~/30m-24h-template.png 24h.png -geometry +93+106 -composite 30m-24h-view.png");
+
+
+
 my $data = `tail -n300 ~/wsprcan/ALL_WSPR.TXT`;
 my @d = split(/\n/, $data);
 @d = reverse(@d);
@@ -42,8 +61,8 @@ my $annotations = "";
 # example input line:
 # 240810 1502   4 -23 -2.2 10.1401428  DJ2TS JO40 30           0     1    0
 
-my @gmt = gmtime();  # when we process the above (1500-1508 slots, it is 1510)
-my $time_filter = sprintf("%02d%02d", $gmt[2], $gmt[1] - 10);    # 1500
+my @gmt = gmtime(time - 600);  # when we process the above (1500-1508 slots, it is 1510) - so go back 10 mins in time...
+my $time_filter = sprintf("%02d%02d", $gmt[2], $gmt[1]);    # 1500
 $time_filter =~ s/\d$//g;    # 150
 
 foreach my $line (@d) {
@@ -57,9 +76,9 @@ foreach my $line (@d) {
         last;
     }
 
-    # don't print decodes above 10.140275 because they are out of the spectrum
+    # don't print decodes above 10.140280 because they are out of the spectrum
     # display
-    if ($freq > 10140275) {
+    if ($freq > 10140280) {
         next;
     }
 
@@ -77,7 +96,11 @@ my $cmd = "convert $basename-0.png -pointsize 12 -fill white $annotations $filen
 
 `$cmd`;
 
-`scp $filename fabian\@d.fkurz.net:/home/fabian/sites/fkurz.net/ham/qrss`
+`scp $filename fabian\@d.fkurz.net:/home/fabian/sites/fkurz.net/ham/qrss`;
 
+# upload 24h image once an hour only? - for now, let's do it every 10 mins
+#if ($gmt[0] == 0) {
+`scp 30m-24h-view.png fabian\@d.fkurz.net:/home/fabian/sites/fkurz.net/ham/qrss/30m-24h-view.png`;
+#}
 
 
