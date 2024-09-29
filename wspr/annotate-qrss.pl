@@ -40,8 +40,23 @@ system("convert -gravity West -chop 10x0 24h.png 24hcrop.png");
 system("convert 24hcrop.png cropped.png +append 24h.png");
 
 # embed in template 
-system("convert ~/30m-24h-template.png 24h.png -geometry +93+106 -composite 30m-24h-view.png");
+system("convert ~/30m-24h-template.png 24h.png -geometry +93+106 -composite 30m-24h-view-no-ts.png");
 
+# add time stamps
+my @g = gmtime(time);
+# how many minutes are we into the current hour?
+my $min = $g[1];
+# current hour in UTC
+my $hr = $g[2];
+# pixel 1533 - $min - 60 = start of previous hour - here we will start!
+my $ann = "";
+my $tmarkx = 1533 - $min - 60;
+for (my $i = 0; $i < 23; $i++) {
+    if (--$hr < 0) { $hr = 23; }
+    $ann .= sprintf(" -annotate +$tmarkx+800 '| %02d:00z' ", $hr);
+    $tmarkx -= 60;
+}
+system("convert 30m-24h-view-no-ts.png -pointsize 12 -fill white $ann 30m-24h-view.png");
 
 
 my $data = `tail -n300 ~/wsprcan/ALL_WSPR.TXT`;
