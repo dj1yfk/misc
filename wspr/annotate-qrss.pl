@@ -33,6 +33,13 @@ my $basename = $1;
 system("convert -crop 875x680+93+106 $filename cropped.png");   # cut out area of interest
 system("mogrify -resize 10x680\! cropped.png");                 # smash to 10px width
 
+# make sure 24h pic is on RAM disk. If not (e.g. due to an unplanned reboot),
+# download latest from the web and cut out the relevant part
+unless (-f "24h.png") {
+    system("wget https://fkurz.net/ham/qrss/30m-24h-view.png -O downloaded.png");
+    system("convert -crop 1439x680+93+106 downloaded.png 24h.png");
+}
+
 # remove oldest 10 minutes from 24h pic
 system("convert -gravity West -chop 10x0 24h.png 24hcrop.png");
 
