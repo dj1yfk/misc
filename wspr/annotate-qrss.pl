@@ -36,12 +36,14 @@ system("mogrify -resize 10x680\! cropped.png");                 # smash to 10px 
 # make sure 24h pic is on RAM disk. If not (e.g. due to an unplanned reboot),
 # download latest from the web and cut out the relevant part
 unless (-f "24h.png") {
-    system("wget https://fkurz.net/ham/qrss/30m-24h-view.png -O downloaded.png");
-    system("convert -crop 1439x680+93+106 downloaded.png 24h.png");
+    #system("wget https://fkurz.net/ham/qrss/30m-24h-view.png -O downloaded.png");
+    #system("convert -crop 1439x680+93+106 downloaded.png 24h.png");
+    system("cp /home/fabian/24h.png /home/fabian/grabs");
 }
 
 # remove oldest 10 minutes from 24h pic
 system("convert -gravity West -chop 10x0 24h.png 24hcrop.png");
+#system("cp 24h.png 24hcrop.png");
 
 # append slice
 system("convert 24hcrop.png cropped.png +append 24h.png");
@@ -100,12 +102,12 @@ foreach my $line (@d) {
 
     # don't print decodes above 10.140280 because they are out of the spectrum
     # display
-    if ($freq > 10140280) {
+    if ($freq > 10140280 + 30) {
         next;
     }
 
     my $xpos = 4 + $x0 + $wx * $slot;
-    my $ypos = $y0 - $ys * ($freq - 10140200) - 5;
+    my $ypos = $y0 - $ys * ($freq - 30 - 10140200) - 5;
 
     $annotations .= " -annotate +$xpos+$ypos '$call'  ";
 
@@ -119,6 +121,8 @@ my $cmd = "convert $basename-0.png -pointsize 12 -fill white $annotations $filen
 `$cmd`;
 
 `scp $filename fabian\@d.fkurz.net:/home/fabian/sites/fkurz.net/ham/qrss`;
+
+sleep 10;
 
 # upload 24h image once an hour only? - for now, let's do it every 10 mins
 #if ($gmt[0] == 0) {
