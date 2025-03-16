@@ -1,13 +1,13 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl 
 
-use strict;
+#use strict;
 use JSON::PP;
 use Time::Piece;
 use GD;
 use GD::Polyline;
 
 system("rm -f xrays-1-day.*");
-system("wget --header=\"accept-encoding: gzip\" https://services.swpc.noaa.gov/json/goes/primary/xrays-1-day.json -O xrays-1-day.json.gz");
+system("wget --header=\"accept-encoding: gzip\" https://services.swpc.noaa.gov/json/goes/primary/xrays-1-day.json -O xrays-1-day.json.gz 2> /dev/null");
 system("gunzip xrays-1-day.json.gz");
 
 my $json = `cat xrays-1-day.json`;
@@ -56,16 +56,16 @@ $im->string(gdGiantFont,70,78,"C",$white);
 
 # draw polyline of 10 most recent datapoints
 
-my @data = qw/1e-6 2e-6 3e-6 9e-6 1e-5 2e-6 2.5e-6 2.9e-6 3e-6 2.5e-6/;
+#my @data = qw/1e-6 2e-6 3e-6 9e-6 1e-5 2e-6 2.5e-6 2.9e-6 3e-6 2.5e-6/;
 
-my $polyline = GD::Polyline->new;
-for (0..9) {
-    my $yval = 10*log($data[$_])/log(10) - 10*log(1e-6)/log(10);
-    $yval *= 3;
-    print "val $data[$_] -> $yval\n";
-    $polyline->addPt(92 + $_*878/10, 100-$yval);
-}
-$im->polydraw($polyline,$white);
+#my $polyline = GD::Polyline->new;
+#for (0..9) {
+#    my $yval = 10*log($data[$_])/log(10) - 10*log(1e-6)/log(10);
+#    $yval *= 3;
+#    print "val $data[$_] -> $yval\n";
+#    $polyline->addPt(92 + $_*878/10, 100-$yval);
+#}
+#$im->polydraw($polyline,$white);
 
 # 24h view
 # width = 1640 x 813
@@ -94,7 +94,7 @@ $im->string(gdGiantFont,70,78,"C",$white);
 my @data = qw/1e-6 2e-6 3e-6 9e-6 1e-5 2e-6 2.5e-6 2.9e-6 3e-6 2.5e-6/;
 
 my $polyline = GD::Polyline->new;
-for (0..1437) {
+for (0..1436) {
     if ($fluxx[$_] == 0) {
         $fluxx[$_] = 1e-6;
     }
